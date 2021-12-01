@@ -1,0 +1,90 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath "com.avast.gradle:gradle-docker-compose-plugin:0.9.2"
+    }
+}
+
+
+apply plugin: 'docker-compose'
+
+subprojects {
+
+    apply plugin: "java"
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven {
+            url "https://dl.bintray.com/eventuateio-oss/eventuate-maven-release"
+        }
+        eventuateMavenRepoUrl.split(',').each { repoUrl -> maven { url repoUrl } }
+    }
+
+    dependencies {
+        implementation(platform("io.eventuate.platform:eventuate-platform-dependencies:$eventuatePlatformVersion"))
+    }
+}
+
+dockerCompose {
+    environment.put "EVENTUATE_COMMON_VERSION", eventuateCommonImageVersion
+    environment.put "EVENTUATE_CDC_VERSION", eventuateCdcImageVersion
+    environment.put "EVENTUATE_SAGA_VERSION", eventuateTramSagasImageVersion
+    environment.put "EVENTUATE_JAVA_BASE_IMAGE_VERSION", eventuateExamplesBaseImageVersion
+
+    if (project.ext.has("envFile")) {
+        environment.put "ENV_FILE", project.ext.envFile
+    }
+
+    mysqlinfrastructure {
+        projectName = null
+        useComposeFiles = ["docker-compose-mysql.yml"]
+        startedServices = ["cdc-service", "zipkin"]
+    }
+    mysql {
+        projectName = null
+        useComposeFiles = ["docker-compose-mysql.yml"]
+
+        if (project.hasProperty('startedServices'))
+          startedServices= project.ext.startedServices.split(',')
+    }
+
+    javaDevelopment {
+        projectName = null
+        useComposeFiles = ["docker-compose-java-development-build.yml"]
+    }
+
+    javaDevelopmentImage {
+        projectName = null
+        useComposeFiles = ["java-development/docker-compose-java-development-build.yml"]
+    }
+}
+
+task prepareJavaDevelopmentDockerImage(type: Exec) {
+    commandLine './prepare-java-development-docker-image.sh'
+}
+
+javaDevelopmentImageComposeBuild.dependsOn(prepareJavaDevelopmentDockerImage)
+
+subprojects.each {
+    if (it.name.endsWith("-service")) {
+        mysqlComposeUp.dependsOn(":" + it.name + ":assemble")
+    }
+}
+
+mysqlComposeUp.dependsOn(mysqlinfrastructureComposeUp)
+
+task buildAndStartServicesMySql(type: GradleBuild) {
+    tasks = ["mysqlComposeUp"]
+}
+
+task stopServicesMySql(type: GradleBuild) {
+    tasks = ["mysqlComposeDown"]
+}

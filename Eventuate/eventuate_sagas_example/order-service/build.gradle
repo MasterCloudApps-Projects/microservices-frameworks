@@ -1,0 +1,18 @@
+apply plugin: ServicePlugin
+
+dependencies {
+    compile project(":order-service-api-messaging")
+    compile project(":order-service-api-web")
+
+    compile "io.eventuate.tram.core:eventuate-tram-spring-optimistic-locking"
+
+    compile "io.eventuate.tram.core:eventuate-tram-spring-jdbc-kafka"
+    compile "io.eventuate.tram.sagas:eventuate-tram-sagas-spring-orchestration-simple-dsl-starter"
+
+    compile "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
+    compile "org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion"
+    compile "org.springframework.boot:spring-boot-starter-actuator"
+
+    compile 'mysql:mysql-connector-java:5.1.36'
+
+}
