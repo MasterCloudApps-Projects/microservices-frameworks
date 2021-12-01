@@ -1,6 +1,6 @@
 # Estudio de frameworks de microservicios (Sagas)
 
-## Introducción
+## 👋Introducción
 
 Este repositorio consiste en el resultado de una investigación sobre el patrón Saga y la implementación de varios frameworks especializados en el uso de estas.
 
@@ -11,7 +11,7 @@ Nuestros objetivos con esta investigación es:
 - **Generar una Documentación**, ya que carecen de información.
 - **Comparar** cada una de estas tecnologías para resaltar los pros y cons, y ayudar a encontrar la opción que más se ajuste a las necesidad de cada caso de uso.
 
-## Frameworks
+## 👨‍💻Frameworks
 
 Los **frameworks** que hemos elegido son: 
 
