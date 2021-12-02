@@ -11,6 +11,8 @@ Nuestros objetivos con esta investigación es:
 - **Generar una Documentación**, ya que carecen de información.
 - **Comparar** cada una de estas tecnologías para resaltar los pros y cons, y ayudar a encontrar la opción que más se ajuste a las necesidad de cada caso de uso.
 
+ 📚 [Enlace a memoria](https://github.com/MasterCloudApps-Projects/microservices-frameworks/blob/main/docs/memoria.pdf)
+
 ## 👨‍💻Frameworks
 
 Los **frameworks** que hemos elegido son: 
