@@ -121,7 +121,7 @@ Primero debemos compilar la aplicación, usamos para ello:
 ./gradlew assemble
 ```
 
-Después, desplegamos los distintos servicios, usando para ello https://docs.docker.com/compose/[Docker Compose]:
+Después, desplegamos los distintos servicios, usando para ello [Docker Compose](https://docs.docker.com/compose/):
 
 ```
 ./gradlew mysqlComposeBuild
