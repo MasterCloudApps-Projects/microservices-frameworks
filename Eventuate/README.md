@@ -3,7 +3,9 @@ Es compatible y configurable con Java Spring Boot, Micronaut y Quarkus<br>
 Este **framework** funciona mediante el envío de mensajes asíncronos entre los distintos participantes de la saga<br>
 Esta formado por cuatro servicios: Apache Zookeeper, Apache Kafka, una Base de datos MySQL y un componente CDC. Todos estos se despliegan con un docker-compose de forma distribuida.
 
-Para implementar una Saga con **Eventuate**, lo primero que debemos hacer es crear una clase que implemente la clase **SimpleSaga** y dentro de la misma definir un orquestador con **SagaDefinition**
+Nuestro ejemplo está formado por dos microservicios: `OrderService` que crea pedidos y `CustomerService` que gestiona a los clientes.
+
+Para implementar una Saga con **Eventuate**, lo primero que debemos hacer es crear una clase que implemente la interfaz **SimpleSaga** y dentro de la misma definir un orquestador con **SagaDefinition**. Todo esto lo haremos en nuestro ejemplo en `OrderService`.
 
 **SimpleSaga**:
 ```
@@ -39,7 +41,7 @@ private void create(CreateOrderSagaData data) {
 }
 ```
 
-**.invokeParticipant**: indica el llamado a una función que requiere la comunicación con algún otro servicio. 
+**.invokeParticipant**: indica el llamado a una función que requiere la comunicación con algún otro servicio. En nuestro ejemplo, es una acción que enviará un comando al `CustomerService`.
 
 ```
 .invokeParticipant(this::reserveCredit)
@@ -53,9 +55,9 @@ private CommandWithDestination reserveCredit(CreateOrderSagaData data) {
 }
 ```
 
-Este tipo de función onsta de un builder send para la creación de comandos que necesitan llegar a otros servicios.
+Este tipo de función consta de un builder send para la creación de comandos que necesitan llegar a otros servicios.
 
-Luego el servicio escucha este comando definiendo así un **CommandHadler**, de esta manera: 
+Luego el servicio receptor escucha este comando definiendo así un **CommandHadler**, de esta manera: 
 ```
 public CommandHandlers commandHandlerDefinitions() {
     return SagaCommandHandlersBuilder
@@ -65,7 +67,7 @@ public CommandHandlers commandHandlerDefinitions() {
 }
 ```
 
-Esto indica que función debe de ejecutarse en caso de recibir un mensaje con la clase (comando) que se indique.
+Esto indica que función debe de ejecutarse en caso de recibir un mensaje con la clase (comando) que se indique. El método `reserveCredit` que vemos a continuación está definido en `CustomerService` y se ejecuta al recibir un `ReserveCreditCommand` del `OrderService`.
 
 
 ```
@@ -84,7 +86,7 @@ Esto indica que función debe de ejecutarse en caso de recibir un mensaje con la
 
 Seguido de este este, se puede añadir una o varias funciones de compensación. 
 
-**withCompensation**: Para compensaciones de funciones locales, y en caso de error se ejecutará de manera automatica la función que se indique. 
+**withCompensation**: en caso de error se ejecutará de manera automatica la función que se indique. En este caso, si falla la reserva de crédito del `CustomerService`, el pedido se rechaza.
 
 ```
 .withCompensation(this::reject)
@@ -93,9 +95,9 @@ private void reject(CreateOrderSagaData data) {
 }
 ```
 
-Luego para compensaciones que requieran la respuesta de un servicio externo se puede utilizar:
+Para gestionar la respuesta que devuelve alguno de los pasos podemos usar:
 
-**onReply**: Espera por la respuesta, y en caso de algún error especifico se puede lanzar una función de compensación.
+**onReply**: Espera por una respuesta específica y si la recibe lanza la ejecución de un método. En nuestro ejemplo, el orquestador espera a las posibles excepciones que puede lanzar el `CustomerService` al ejecutar el `reserveCredit` y, si alguna de las dos excepciones llega, lanza un método para actualizar el motivo del rechazo del pedido.
 
 ```
 .invokeParticipant(this::reserveCredit)
@@ -111,4 +113,76 @@ private void handleCustomerCreditLimitExceeded(CreateOrderSagaData data, Custome
 }
 ```
 
+## Compilar y lanzar la aplicación
 
+Primero debemos compilar la aplicación, usamos para ello:
+
+```
+./gradlew assemble
+```
+
+Después, desplegamos los distintos servicios, usando para ello https://docs.docker.com/compose/[Docker Compose]:
+
+```
+./gradlew mysqlComposeBuild
+./gradlew mysqlComposeUp
+```
+
+Una vez que se ha iniciado nuestra aplicación, podemos las urls de nuestros servicios serán:
+
+    - order-service:  http://localhost:8081
+    - customer-service:  http://localhost:8082
+    - api-gateway:  http://localhost:8083
+
+
+Cuando hayamos terminado la ejecución, podemos parar y eliminar los contenedores creados por el docker-compose con:
+
+```
+    $ ./gradlew mysqlComposeDown
+```
+
+## Ejemplos de uso
+
+Vamos a utilizar curl para ver cómo funciona esta aplicación.
+
+Crear un cliente
+```bash
+$ curl -X POST --header "Content-Type: application/json" -d '{
+  "creditLimit": 5,
+  "name": "Nombre Apellido"
+}' http://localhost:8082/customers
+
+HTTP/1.1 200
+Content-Type: application/json;charset=UTF-8
+
+{
+  "customerId": 1
+}
+```
+
+Crear un pedido
+```bash
+$ curl -X POST --header "Content-Type: application/json" -d '{
+  "customerId": 1,
+  "orderTotal": 4
+}' http://localhost:8081/orders
+
+HTTP/1.1 200
+Content-Type: application/json;charset=UTF-8
+
+{
+  "orderId": 1
+}
+```
+
+Comprobar el estado del pedido que hemos creado
+```bash
+$ curl -X GET http://localhost:8081/orders/1
+
+HTTP/1.1 200
+Content-Type: application/json;charset=UTF-8
+
+{
+  "orderId": 1,
+  "orderState": "APPROVED"
+}
