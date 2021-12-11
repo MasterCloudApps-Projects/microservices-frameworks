@@ -228,6 +228,7 @@ Esto es un server host (Gráfico) que te permite ver los pasos que se van ejecut
 Para poder probar la aplicación tenemos las siguiente peticiones: 
 
 **Crear un customer POST (http://localhost:8081/customers)**:
+
 body:
 ```
 {
@@ -236,6 +237,7 @@ body:
 }
 ```
 **Crear una orden POST (http://localhost:8080/orders)**:
+
 body:
 ```
 {
@@ -244,6 +246,7 @@ body:
 }
 ```
 **Obtener una orden GET (http://localhost:8080/orders)**:
+
 body:
 ```
 [
@@ -259,6 +262,7 @@ body:
 ```
 
 **Obtener un customer GET (http://localhost:8081/get_customer?id=customerid)**:
+
 body:
 ```
 {

@@ -190,6 +190,7 @@ Luego de arrancar el servidor es momento de arrancar cada servicio de manera ind
 Para poder probar la aplicación tenemos las siguiente peticiones de POSTMAN: 
 
 **Crear un customer POST (http://localhost:8081/create)**:
+
 body:
 ```
 {
@@ -198,6 +199,7 @@ body:
 }
 ```
 **Crear una orden POST (http://localhost:8080/order)**:
+
 body:
 ```
 {
@@ -206,6 +208,7 @@ body:
 }
 ```
 **Obtener una orden GET (http://localhost:8080/get_order?id=orderid)**
+
 body:
 ```
 {
@@ -219,6 +222,7 @@ body:
 ```
 
 **Obtener un customer GET (http://localhost:8081/get_customer?id=customerid)**
+
 body:
 ```
 {
