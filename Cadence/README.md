@@ -1,4 +1,4 @@
-## Cadence
+# Cadence
 Es compatible y configurable con Java, Spring Boot y Go.
 
 Este **framework** tiene un paquete que te permite definir y crear arquitecturas basadas en eventos y sagas.
@@ -208,7 +208,7 @@ Luego de tener esto definido, vamos a crear el flujo de comportamiento de la sag
         }
     }
 ```
-## Inicializar la app
+## Compilar y lanzar la aplicación
 Estos son los pasos para inicializar el back de Cadence:
 
 ### Download docker compose Cadence Server
@@ -224,10 +224,11 @@ Descargamos el fichero de docker-compose con todo lo necesario para inicializar 
 Esto es un server host (Gráfico) que te permite ver los pasos que se van ejecutando a lo largo de un workflow.
 > docker run --network=host --rm ubercadence/cli:master --do example domain register -rd 1
 
-## REST API
-Para poder probar la aplicación tenemos las siguiente peticiones de POSTMAN: 
+## Ejemplos de uso
+Para poder probar la aplicación tenemos las siguiente peticiones: 
 
 **Crear un customer POST (http://localhost:8081/customers)**:
+body:
 ```
 {
     "name": "Stefano Lagattolla",
@@ -235,14 +236,15 @@ Para poder probar la aplicación tenemos las siguiente peticiones de POSTMAN:
 }
 ```
 **Crear una orden POST (http://localhost:8080/orders)**:
+body:
 ```
 {
     "money": 1500,
     "customerId": "1"
 }
 ```
-**Obtener una orden GET (http://localhost:8080/orders)**
-
+**Obtener una orden GET (http://localhost:8080/orders)**:
+body:
 ```
 [
     {
@@ -256,8 +258,8 @@ Para poder probar la aplicación tenemos las siguiente peticiones de POSTMAN:
 ]
 ```
 
-**Obtener un customer GET (http://localhost:8081/get_customer?id=customerid)**
-
+**Obtener un customer GET (http://localhost:8081/get_customer?id=customerid)**:
+body:
 ```
 {
     "id": customerid,

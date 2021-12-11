@@ -116,7 +116,7 @@ En caso de usar el **associateWith**, debe de pasarse el id del agregador al que
 @SagaEventHandler(associationProperty = "orderId")
 ```
 
-## Axon Server
+### Axon Server
 
 Para el uso de Sagas y de este framework es necesario tener un Axon Server arrancado.
 
@@ -173,6 +173,8 @@ Se crea la estructura de la saga definiendo los eventos que vamos a recibir y lo
 
 Con todo esto tenemos definido toda la estructura y lo que tenemos que hacer es arrancar la app de esta manera: 
 
+## Compilar y lanzar la aplicación
+
 ### Arrancamos el Axon Server
 Esto es necesario para automatizar la persistencia de estados de los agregadores y la comunicación mediante EventSourcing de los servicios.
 
@@ -184,10 +186,11 @@ Luego de arrancar el servidor es momento de arrancar cada servicio de manera ind
 > /order mvn spring-boot:run
 > /customer mvn spring-boot:run
 
-### REST API
+## Ejemplos de uso
 Para poder probar la aplicación tenemos las siguiente peticiones de POSTMAN: 
 
 **Crear un customer POST (http://localhost:8081/create)**:
+body:
 ```
 {
     "name": "Stefano Lagattolla",
@@ -195,6 +198,7 @@ Para poder probar la aplicación tenemos las siguiente peticiones de POSTMAN:
 }
 ```
 **Crear una orden POST (http://localhost:8080/order)**:
+body:
 ```
 {
     "price": 1500,
@@ -202,7 +206,7 @@ Para poder probar la aplicación tenemos las siguiente peticiones de POSTMAN:
 }
 ```
 **Obtener una orden GET (http://localhost:8080/get_order?id=orderid)**
-
+body:
 ```
 {
     "id": orderid,
@@ -215,7 +219,7 @@ Para poder probar la aplicación tenemos las siguiente peticiones de POSTMAN:
 ```
 
 **Obtener un customer GET (http://localhost:8081/get_customer?id=customerid)**
-
+body:
 ```
 {
     "id": customerid,
