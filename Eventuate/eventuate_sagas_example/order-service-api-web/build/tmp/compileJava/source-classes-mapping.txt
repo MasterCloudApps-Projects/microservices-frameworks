@@ -1,0 +1,6 @@
+io/eventuate/examples/tram/sagas/ordersandcustomers/orders/api/web/CreateOrderRequest.java
+ io.eventuate.examples.tram.sagas.ordersandcustomers.orders.api.web.CreateOrderRequest
+io/eventuate/examples/tram/sagas/ordersandcustomers/orders/api/web/CreateOrderResponse.java
+ io.eventuate.examples.tram.sagas.ordersandcustomers.orders.api.web.CreateOrderResponse
+io/eventuate/examples/tram/sagas/ordersandcustomers/orders/api/web/GetOrderResponse.java
+ io.eventuate.examples.tram.sagas.ordersandcustomers.orders.api.web.GetOrderResponse

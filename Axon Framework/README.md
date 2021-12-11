@@ -1,6 +1,9 @@
-## Axon Framework
+# Axon Framework
 Es compatible y configurable con Java y Spring Boot<br>
 Este **framework** tiene un paquete que te permite definir y crear arquitectura CQRS de manera rápida y sencilla.<br>
+Acá explicaremos un poco la documentación y como hemos implementado esta en el ejemplo genérico.
+
+## Documentación
 Las principales funciones y comandos de integración e implementación de este framework para **Spring Boot** son:<br>
 **@Aggregate**: es un objeto que contiene un estado y metodos para alterar este estado. Por defecto, Axon configura los agregadores como 'Event Sourced'.
 
@@ -133,17 +136,92 @@ Debemos añadir la respectiva dependencia en el .pom de nuestros microservicios:
 </dependency>
 ``` 
 
-En caso de querer utilizar Axon solo para estructurar una arquitectura CQRS sin EventSourcing y Sagas, se puede utilizar sin Axon Server. 
-
-Este se ignora añadiendo esto a la dependencia en el .pom:
-
-```
-<exclusions>
-    <exclusion> 
-        <groupId>org.axonframework</groupId>
-        <artifactId>axon-server-connector</artifactId> 
-    </exclusion>
-</exclusions>
-```
-
 [Axon Server](https://docs.axoniq.io/reference-guide/axon-server/introduction) es totalmente configurable y también se puede utilizar Kubernetes para configurar temas de seguridad, bases de datos, Network Policies, entre otros.
+
+## Implementación
+
+Primero que todo creamos los agregadores de **Customer** y **Order** para que estos se persistan. 
+
+```
+@Aggregate
+public class CustomerAggregate {
+
+	@AggregateIdentifier
+    private String customerId;
+```
+
+```
+@Aggregate
+public class OrderAggregate {
+
+	@AggregateIdentifier
+    private String orderId;
+```
+
+Luego creamos una Saga, que hemos decidido llamar **OrderSaga**.
+
+Con esto definimos el flujo de como el proceso de creación y verificación de una orden va a ser. 
+
+Definimos el inicio de la Saga, que será cuando se cree una orden y se disparé un evento especifico (orderCreatedEvent).
+```
+@StartSaga
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(OrderCreatedEvent orderCreatedEvent){
+```
+
+Se crea la estructura de la saga definiendo los eventos que vamos a recibir y los comandos que vamos a enviar para comunicar los dos servicios entre sí, entre ellos tenemos: OrderCreatedEvent, ValidatedCustomerPaymentEvent,InsufficientMoneyEvent, OrderRejectedCommand, OrderApprovedCommand.
+
+Con todo esto tenemos definido toda la estructura y lo que tenemos que hacer es arrancar la app de esta manera: 
+
+### Arrancamos el Axon Server
+Esto es necesario para automatizar la persistencia de estados de los agregadores y la comunicación mediante EventSourcing de los servicios.
+
+Para arrancar el servidor de Axon hay que correr lo siguiente: 
+> docker run -t --name my-axon-server -p 8024:8024 -p 8124:8124 axoniq/axonserver
+
+### Arrancamos los dos servicios (Order y Customer)
+Luego de arrancar el servidor es momento de arrancar cada servicio de manera individual
+> /order mvn spring-boot:run
+> /customer mvn spring-boot:run
+
+### REST API
+Para poder probar la aplicación tenemos las siguiente peticiones de POSTMAN: 
+
+**Crear un customer POST (http://localhost:8081/create)**:
+```
+{
+    "name": "Stefano Lagattolla",
+    "balance": 18000
+}
+```
+**Crear una orden POST (http://localhost:8080/order)**:
+```
+{
+    "price": 1500,
+    "customerId": "3ce57fdf-a5d0-468d-8f42-6dea737819e52"
+}
+```
+**Obtener una orden GET (http://localhost:8080/get_order?id=orderid)**
+
+```
+{
+    "id": orderid,
+    "state": "APPROVED"
+    "price": 1500,
+    "customerId": "3ce57fdf-a5d0-468d-8f42-6dea737819e52",
+    "rejectedReason": ""
+    
+}
+```
+
+**Obtener un customer GET (http://localhost:8081/get_customer?id=customerid)**
+
+```
+{
+    "id": customerid,
+    "name": "Stefano",
+    "balance": 1500
+}
+```
+
+

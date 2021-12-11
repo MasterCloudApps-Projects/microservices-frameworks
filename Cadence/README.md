@@ -3,18 +3,9 @@ Es compatible y configurable con Java, Spring Boot y Go.
 
 Este **framework** tiene un paquete que te permite definir y crear arquitecturas basadas en eventos y sagas.
 
-El back de Cadence utiliza por defecto como BBDD Cassandra o MySQL/Postgress. Se puede implementar un adaptador para poder utilizar cualquier otra BBDD, es decir, es totalmente configurable.
+Acá explicaremos un poco la documentación y como hemos implementado esta en el ejemplo genérico.
 
-Estos son los pasos para inicializar el back de Cadence: 
-### Download docker compose Cadence Server
-> curl -O https://raw.githubusercontent.com/uber/cadence/master/docker/docker-compose.yml
-> 
-> docker-compose up
-
-### Run cadence server host
-> docker run --network=host --rm ubercadence/cli:master --do example domain register -rd 1
-
-## Implementación del framework
+## Documentación
 
 El nucleo de **Cadence** esta basado en una unidad de estados llamada *workflow*, que es donde podemos implementar las Sagas. Un workflow esta compuesto por una serie de pasos y funciones que nos permite llevar a cabo una orquestación de un proceso entre sericios. 
 
@@ -153,7 +144,124 @@ public void save(Order order) {
 }
 ```
 
+
 Haciendo esto, corremos el workflow y por ende la saga para realizar el proceso de manera automatica según lo hayamos definido.
 
+## Implementación
+Para desarrollar una Sagas en este framework tenemos que primero crear las interfaces de **Activities** y **Workflows**, y sus respectivas implementaciones.
 
+```
+public interface CustomerActivities {
+	void reserveCredit(Long customerId, Double amount);
+}
+public class CustomerActivitiesImpl implements CustomerActivities {
+```
 
+```
+public interface OrderActivities {
+	Long createOrder(Long customerId, Double money);
+    void approveOrder(Long orderId);
+    void rejectOrder(Long orderId, String rejectionReason);
+}
+public class OrderActivitiesImpl implements OrderActivities {
+```
+Con esto definimos los métodos que vamos a utilizar a lo largo de nuestra Saga o Workflow. Así seguimos implementando el workflow.
+
+```
+public interface CreateOrderWorkflow {
+	@WorkflowMethod
+    Long createOrder(Long customerId, Double totalMoney);
+}
+public class CreateOrderWorkflowImpl implements CreateOrderWorkflow {
+    @Override
+    public Long createOrder(Long customerId, Double amount) {
+        System.out.print("Entrando al principio de la funcion");
+        Saga.Options sagaOptions = new Saga.Options.Builder().build();
+```
+
+Luego de tener esto definido, vamos a crear el flujo de comportamiento de la saga dentro del **Workflow** ejecutando **Activities** y añadiendo **Compensations**:
+
+```
+@Override
+    public Long createOrder(Long customerId, Double amount) {
+        System.out.print("Entrando al principio de la funcion");
+        Saga.Options sagaOptions = new Saga.Options.Builder().build();
+        Saga saga = new Saga(sagaOptions);
+        System.out.print("Entro aca");
+        String rejectedReason = "REJECTED_REASON";
+        try {
+            Long orderId = orderActivities.createOrder(customerId, amount);
+            System.out.print("Entro aca");
+            saga.addCompensation(orderActivities::rejectOrder, orderId, rejectedReason);
+            customerActivities.reserveCredit(customerId, amount);
+            orderActivities.approveOrder(orderId);
+            System.out.print("Entro aca");
+            return orderId;
+        } catch (ActivityFailureException e) {
+            if(e.getCause() != null && e.getCause().getCause() instanceof CustomerNotFoundException) {
+                rejectedReason = "CUSTOMER NOT FOUND";
+            } else {
+                rejectedReason = "CREDIT LIMIT EXCEEDED";
+            }
+            saga.compensate();
+            throw e;
+        }
+    }
+```
+## Inicializar la app
+Estos son los pasos para inicializar el back de Cadence:
+
+### Download docker compose Cadence Server
+Descargamos el fichero de docker-compose con todo lo necesario para inicializar nuestro back de cadence.
+
+> curl -O https://raw.githubusercontent.com/uber/cadence/master/docker/docker-compose.yml
+> 
+> docker-compose up
+
+### Run cadence server host
+**OPCIONAL**
+
+Esto es un server host (Gráfico) que te permite ver los pasos que se van ejecutando a lo largo de un workflow.
+> docker run --network=host --rm ubercadence/cli:master --do example domain register -rd 1
+
+## REST API
+Para poder probar la aplicación tenemos las siguiente peticiones de POSTMAN: 
+
+**Crear un customer POST (http://localhost:8081/customers)**:
+```
+{
+    "name": "Stefano Lagattolla",
+    "money": 18000
+}
+```
+**Crear una orden POST (http://localhost:8080/orders)**:
+```
+{
+    "money": 1500,
+    "customerId": "1"
+}
+```
+**Obtener una orden GET (http://localhost:8080/orders)**
+
+```
+[
+    {
+        "id": orderid,
+        "state": "APPROVED"
+        "money": 1500,
+        "customerId": "3ce57fdf-a5d0-468d-8f42-6dea737819e52",
+        "rejectedReason": ""
+    },
+    ...
+]
+```
+
+**Obtener un customer GET (http://localhost:8081/get_customer?id=customerid)**
+
+```
+{
+    "id": customerid,
+    "name": "Stefano",
+    "money": 1500
+}
+```

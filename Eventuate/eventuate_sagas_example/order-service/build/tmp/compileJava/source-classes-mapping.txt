@@ -1,0 +1,16 @@
+io/eventuate/examples/tram/sagas/ordersandcustomers/orders/domain/Order.java
+ io.eventuate.examples.tram.sagas.ordersandcustomers.orders.domain.Order
+io/eventuate/examples/tram/sagas/ordersandcustomers/orders/OrdersServiceMain.java
+ io.eventuate.examples.tram.sagas.ordersandcustomers.orders.OrdersServiceMain
+io/eventuate/examples/tram/sagas/ordersandcustomers/orders/domain/OrderRepository.java
+ io.eventuate.examples.tram.sagas.ordersandcustomers.orders.domain.OrderRepository
+io/eventuate/examples/tram/sagas/ordersandcustomers/orders/service/OrderSagaService.java
+ io.eventuate.examples.tram.sagas.ordersandcustomers.orders.service.OrderSagaService
+io/eventuate/examples/tram/sagas/ordersandcustomers/orders/service/CreateOrderSaga.java
+ io.eventuate.examples.tram.sagas.ordersandcustomers.orders.service.CreateOrderSaga
+io/eventuate/examples/tram/sagas/ordersandcustomers/orders/web/OrderController.java
+ io.eventuate.examples.tram.sagas.ordersandcustomers.orders.web.OrderController
+io/eventuate/examples/tram/sagas/ordersandcustomers/orders/OrderConfiguration.java
+ io.eventuate.examples.tram.sagas.ordersandcustomers.orders.OrderConfiguration
+io/eventuate/examples/tram/sagas/ordersandcustomers/orders/service/OrderService.java
+ io.eventuate.examples.tram.sagas.ordersandcustomers.orders.service.OrderService
