@@ -1,39 +1,40 @@
 # Axon Framework
-Es compatible y configurable con Java y Spring Boot<br>
-Este **framework** tiene un paquete que te permite definir y crear arquitectura CQRS de manera rápida y sencilla.<br>
-Acá explicaremos un poco la documentación y como hemos implementado esta en el ejemplo genérico.
+It supports Java with Spring Boot<br>
+This **framework** has a package that helps us define and create CQRS arquitectures easily.
 
-## Documentación
-Las principales funciones y comandos de integración e implementación de este framework para **Spring Boot** son:<br>
-**@Aggregate**: es un objeto que contiene un estado y metodos para alterar este estado. Por defecto, Axon configura los agregadores como 'Event Sourced'.
+Here we're gonna explain the basics of the Axon documentation and how to implement it.
+
+## Documentation
+The main functions and command are:
+**@Aggregate**: This is an object that has a state and methods to change it's own state. By defualt, Axon configures the aggregators with Event Sourcing.
 
 ```
 @Aggregate
 public class CustomerAggregate () {
 ```
 
-**@AggregateIdentifier**: te permite definir el identificador de un agregador.
+**@AggregateIdentifier**: to declare the id of an aggregator.
 
 ```
 @AggregateIdentifier
 private String customerId;
 ```
 
-**@CommandHandler**: Anotación para identificar una función como un manejador de un comando específico. Esto permite manejar los comandos para luego emitir eventos.
+**@CommandHandler**: Identifies a function as command hanlder. This allow us to manage certain commands to send events.
 ```
 @CommandHandler
 public void handle(ValidateCustomerPaymentCommand validateCustomerPaymentCommand) {
 ```
 
-**Nota**: El primer comando, que sería el primer comando para crear la primera instancia del agregador, debe de estar anotado de esta manera:
+**Note**: The first command defined inside of an Aggregator, that it should be the one needed to create itself, it should be written this way:
 
 ```@CommandHandler
 public CustomerAggregate(CreateCustomerCommand createCustommerCommand) {
 ```
 
-**@EventSourcingHandler**: Esta anotación se utiliza para manejar un evento. Estas funciones se utlizan en los agregadores para auto-actualizar su propio estado. También se pueden usar en servicios o sagas para ejecutar una axión u comando luego de recibir un evento específico.
+**@EventSourcingHandler**: This annotation it's used to manage events. On the aggregators its used to update it's own state. And it can also be used on services and Sagas to exectue an action or command.
 
-**agregador**
+**Aggregator**
 
 ```
 @EventHandler
@@ -42,7 +43,7 @@ public void on(CustomerCreatedEvent customerCreatedEvent) {
     this.name = customerCreatedEvent.getName();
 ```
 
-**Servicio**
+**Service**
 
 ```
 @EventHandler
@@ -52,65 +53,58 @@ public void on(OrderCreatedEvent orderCreatedEvent) {
 }
 ```
 
-**@QueryHandler**: esto es una anotación que nos permite definir una función para manejar los queries.
+**@QueryHandler**: this annotation allows us to define a function to handle queries.
 
 ```
 @QueryHandler<br>
 public Order handle(FindOrderByIdQuery findOrderByIdQuery) {
 ```
 
-Axon también nos promorciona gateways que podemos utilizar para emitir queries, comandos y eventos.
+Axon aslo gives us gateways that we can use to emit events, queries and commands. 
 
-**CommandGateway**: Sirve para enviar comandos. Tenemos .send (async) y sendAndWait (sync).
+**CommandGateway**: It's used to send commands. We have .send (async) and .sendAndWait (sync)
 
 ```
-commandGateway.send(COMANDO);
+commandGateway.send(COMMAND);
 ```
 
-**AggregateLifecycle**: Este nos permite cambiar el ciclo de vida de un agregador y emitir un evento.
+**AggregateLifecycle**: This allow us change the state of the aggregate and the emite an event.
 
 ```
 AggregateLifecycle.apply(new OrderCreatedEvent())
 ```
 
-**QueryGateway**: Permite emitir una query para ser escuchada por el @QueryHandler
-
-```
-queryGateway.query(new FindOrderByIdQuery())
-```
-
 ### Sagas
-Las sagas en axon se implementan de esta manera y con estas anotaciones:
+The sagas in Axon are implemented this way:
 
-**@Saga**: nos sirve para distinguir que una clase o servicio es de tipo Saga.
+**@Saga**: Annotation to define a Saga.
 
 ```
 @Saga
 public class OrderSaga {
 ```
 
-**@StartSaga**: esto es una anotación que sirve para definir una función específica como la que va a iniciar la Saga.
+**@StartSaga**: Annotation that defined the function that is gonna fire the Saga.
 
 ```
 @StartSaga
 public void handle(OrderCreatedEvent orderCreatedEvent){
 ```
 
-**@SagaEventHandler**: se utiliza para definir, dentro de una saga, una función que reciba o se ejecute al recibir un tipo de evento específico.
+**@SagaEventHandler**: It's used to define functions of a saga, they're defined by functions that recieved a specific Event class.
 
 ```
 @SagaEventHandler(associationProperty = "orderId")
 public void handle(OrderCreatedEvent orderCreatedEvent){
 ```
 
-Luego tenemos dentro de las sagas un serivicio que nos proporciona Axon, que te permite cambiar el estado de la saga y seguir su camino respectivo (ya sea el siguiente paso o terminarla).
+Then, inside of a saga we can change the state of it or ended it this way:
 
 ```
 SagaLifecycle.associateWith('nuevo id');
 SagaLifecycle.end();
 ```
-
-En caso de usar el **associateWith**, debe de pasarse el id del agregador al que va a ser referencia el proximo paso y evento a lanzarse. Luego dentro del eventHandler se define que propiedad de asociación se utilizará.
+In case of using **associateWith**, it should pass the id of the aggreator that is going to refer to on the next step of the saga.
 
 ```
 @SagaEventHandler(associationProperty = "orderId")
@@ -118,15 +112,15 @@ En caso de usar el **associateWith**, debe de pasarse el id del agregador al que
 
 ### Axon Server
 
-Para el uso de Sagas y de este framework es necesario tener un Axon Server arrancado.
+In order to use Sagas on this framework we need to have an active Axon Server.
 
-Este proporciona una base de datos donde se guardan los registros del cambio de estado de cada uno de los aggreadores asi como también, automatización para comunicar los eventos y comandos al rededor de todos los microservicios conectados a este servidor.
+This give us a BBDD where it automatically save all state history of the aggregators, and stablished a communication channel between the different services.
 
-Para arrancar un **Axon Server** en local, se puede hacer con el siguiente comando de docker: 
+In order to start an Axon Server locally, we need to run this:
 
 > docker run -t --name my-axon-server -p 8024:8024 -p 8124:8124 axoniq/axonserver
 
-Debemos añadir la respectiva dependencia en el .pom de nuestros microservicios: 
+And on the client we need to this dependency to the .pom:
 
 ```
 <dependency>
@@ -136,11 +130,11 @@ Debemos añadir la respectiva dependencia en el .pom de nuestros microservicios:
 </dependency>
 ``` 
 
-[Axon Server](https://docs.axoniq.io/reference-guide/axon-server/introduction) es totalmente configurable y también se puede utilizar Kubernetes para configurar temas de seguridad, bases de datos, Network Policies, entre otros.
+[Axon Server](https://docs.axoniq.io/reference-guide/axon-server/introduction) it can be configured and it can be implemented in Kubernetes too for more configuration and network policies.
 
-## Implementación
+## Implementation
 
-Primero que todo creamos los agregadores de **Customer** y **Order** para que estos se persistan. 
+First of all, we create the aggregators Customer and Order.
 
 ```
 @Aggregate
@@ -158,38 +152,36 @@ public class OrderAggregate {
     private String orderId;
 ```
 
-Luego creamos una Saga, que hemos decidido llamar **OrderSaga**.
+Then, we create a Saga called **OrderSaga**.
 
-Con esto definimos el flujo de como el proceso de creación y verificación de una orden va a ser. 
+With this, we defined our application flow:
 
-Definimos el inicio de la Saga, que será cuando se cree una orden y se disparé un evento especifico (orderCreatedEvent).
+We need to define the start of a Saga, and will be when we create an order:
 ```
 @StartSaga
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(OrderCreatedEvent orderCreatedEvent){
 ```
 
-Se crea la estructura de la saga definiendo los eventos que vamos a recibir y los comandos que vamos a enviar para comunicar los dos servicios entre sí, entre ellos tenemos: OrderCreatedEvent, ValidatedCustomerPaymentEvent,InsufficientMoneyEvent, OrderRejectedCommand, OrderApprovedCommand.
+Create the structure of a saga defining the event that we're gonna recieve and the command that we're gonna send to communicate the Order Service and the Customer Service. Among this we have: OrderCreatedEvent, ValidatedCustomerPaymentEvent,InsufficientMoneyEvent, OrderRejectedCommand, OrderApprovedCommand.
 
-Con todo esto tenemos definido toda la estructura y lo que tenemos que hacer es arrancar la app de esta manera: 
+## Compile and launch the application
 
-## Compilar y lanzar la aplicación
+### Start the Axon Server
+This is need to perist the state of the aggregators and for the communication between services using event sourcing.
 
-### Arrancamos el Axon Server
-Esto es necesario para automatizar la persistencia de estados de los agregadores y la comunicación mediante EventSourcing de los servicios.
-
-Para arrancar el servidor de Axon hay que correr lo siguiente: 
+To run our server:
 > docker run -t --name my-axon-server -p 8024:8024 -p 8124:8124 axoniq/axonserver
 
-### Arrancamos los dos servicios (Order y Customer)
-Luego de arrancar el servidor es momento de arrancar cada servicio de manera individual
+### Launch Customer and Order service
+After running the Axon Server, it's time to run each services that will connect to Axon Server:
 > /order mvn spring-boot:run
 > /customer mvn spring-boot:run
 
-## Ejemplos de uso
-Para poder probar la aplicación tenemos las siguiente peticiones de POSTMAN: 
+## Use cases
+To test the app we can use POSTMAN with this URLs:
 
-**Crear un customer POST (http://localhost:8081/create)**:
+**Create Customer POST (http://localhost:8081/create)**:
 
 body:
 ```
@@ -198,7 +190,7 @@ body:
     "balance": 18000
 }
 ```
-**Crear una orden POST (http://localhost:8080/order)**:
+**Create Order POST (http://localhost:8080/order)**:
 
 body:
 ```
@@ -207,7 +199,7 @@ body:
     "customerId": "3ce57fdf-a5d0-468d-8f42-6dea737819e52"
 }
 ```
-**Obtener una orden GET (http://localhost:8080/get_order?id=orderid)**
+**Get Order GET (http://localhost:8080/get_order?id=orderid)**
 
 body:
 ```
@@ -221,7 +213,7 @@ body:
 }
 ```
 
-**Obtener un customer GET (http://localhost:8081/get_customer?id=customerid)**
+**Get Customer GET (http://localhost:8081/get_customer?id=customerid)**
 
 body:
 ```

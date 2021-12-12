@@ -1,51 +1,48 @@
-# Estudio de frameworks de microservicios (Sagas)
+# Microservices Sagas Frameworks comparitions
 
-## 👋 Introducción
+## 👋 Introduction
 
-Este repositorio consiste en el resultado de una investigación sobre el patrón Saga y la implementación de varios frameworks especializados en el uso de estas.
+This repository is about the result of an investigation about the Saga Pattern and the implementatation of several Sagas frameworks.
 
-Hemos comparado como se implementan, la curva de aprendizaje, rapidez, antigüedad, comunidad, documentación, entre otras cosas.
+We have compared: how it's implemented, learning curve, velocity, efficiency, size of the community, documentation, among other things. 
 
-Nuestros objetivos con esta investigación es: 
-- **Investigar** las opciones de frameworks que hay en el mercado.
-- **Generar una Documentación**, ya que carecen de información.
-- **Comparar** cada una de estas tecnologías para resaltar los pros y cons, y ayudar a encontrar la opción que más se ajuste a las necesidad de cada caso de uso.
+Our objectives with this investigatin are:
+- **Research** the options for frameworks available on the market right now.
+- **Generate documentation**, since it lacks of information.
+- **Compare** each and every technology to remark the pros and cons of each one of them. And help to find the best suited option for each of the use cases. 
 
- 📚 [Enlace a memoria](https://github.com/MasterCloudApps-Projects/microservices-frameworks/blob/main/docs/memoria.pdf)
+ 📚 [Link to the memory](https://github.com/MasterCloudApps-Projects/microservices-frameworks/blob/main/docs/memoria.pdf)
 
-## 📊 Comparativa y Ejercicio
-Para poder hacer la comparación, entre las tecnologías que escogimos, hemos hecho el mismo ejercicio para cada uno de estos frameworks. 
+## 📊 Comparition and Excercise
+In order to do the best comparition between the technologies we picked, we've chosen to implement the same excersise. And it counts with two services:
 
-El ejericio consta de dos servicios: 
+ ### Services:
 
- ### Servicios:
+- **Order Service**: This service is in charge of: creating, organize and finish every order. Here is where the Saga Pattern is implemented to communicate between other services.
+- **Customer Service**: This service is for the management of the customer, the one in charge of verify the balance of each customer in order to say if the order can or not be approved. 
 
-- **Order Service**: El servicio de las ordenes que se encarga de crearlas, ordenarlas y terminarlas. Aquí es donde se ejerce el patrón Saga para la comunicación con otros microservicios
-- **Customer Service**: Este es un servicio para los customers que se encarga de verificar el balance y decir si se puede o no aceptar la orden. 
+The excercise consist in creating a Saga on the **Order Service** to manage the communication and orquestation with the **Customer Service**. At the moment of the creation of an Order the Saga is initialized and run through different steps.
 
-Consiste en crear una Saga que se encargue de comunicar el **Order Service** con el **Customer Service** al momento de crear una orden y que esta pase por los diferentes pasos y estados. 
+### Steps:
 
-### Pasos:
-
-- **Crear Customer**: Tenemos que crear el customer, al que va asociada una o varias ordenes, con un balance especifico. 
-- **Crear Orden**: Se crea una orden con su respectivo Customer.
-- **Verificar Balance**: Se verifica desde el **Order Service** que el Customer al que va a asociada la orden tenga suficiente balance como para aceptar la orden. En caso de no tener suficiente balance para aceptar esta orden, el customer debe de rechazar la orden.
-- **Actualizar Estado Final de la Orden**: En función de la respuesta del **Customer Service** se actualiza el estado de la orden, sea rechazada o aprobada.
+- **Create Customer**: We need to create a customer in order to associate it with the order we want to create. The customer need to be created with an amount of balance. 
+- **Crear Orden**: Then we create the order with a specific customer.
+- **Verificar Balance**: Withing the **Order Service** we verify is the customer that associeted with the order has enough balance to approved or else it will be rejected by insufficient fund.
+- **Actualizar Estado Final de la Orden**: After the response of the **Customer Service** the state of the order will change to REJECTED or APPROVED.
 
 ## 👨‍💻 Frameworks
 
-Los **frameworks** que hemos elegido son: 
+The **frameworks** we chose are:
 
 ## Axon:
 <img src="./assets/img/axon.png" width="600"/>
 
 <br/>
+Is a framework developed for the construction of microservices controlled by events, it's based on CQRS and Event Sourcing arquitecture. And it can implement the Saga Pattarn between them.
 
-Es un framework desarrollado para la construcción de microservicios controlados por eventos, basado en las arquitecturas CQRS y Event Sourcing y para la implementación de Sagas entre estos.
+For more information about Axon Framework, click [here](https://docs.axoniq.io/reference-guide/) for the documentation.
 
-Para ver más info de Axon Framework, [aquí](https://docs.axoniq.io/reference-guide/) la documentación.
-
-[Ejemplo de Axon Framework](https://github.com/MasterCloudApps-Projects/microservices-frameworks/tree/main/Axon%20Framework) : Ejemplo simple de implementación de patrón Sagas en Axon Framework.
+[Example with Axon Framework](https://github.com/MasterCloudApps-Projects/microservices-frameworks/tree/main/Axon%20Framework) : The example specified before implemented with this framework.
 
 
  ## Eventuate:
@@ -53,21 +50,21 @@ Para ver más info de Axon Framework, [aquí](https://docs.axoniq.io/reference-g
 
 <br/>
 
-Eventuate Tram Sagas es un framework para implementar sagas en microservicios Java que usen SpringBoot, Micronaut o Quarkus. Está basado en el framework Eventuate Tram, que funciona mediante el envío de mensajes asíncronos entre los distintos participantes de la saga. Esto permite a los microservicios acualizar de forma automática su estado y publicar esta información como mensajes o eventos a otros servicios.
+Eventuate Tram Sagas is a framework used to implemen the Saga Pattern between microservices. It uses Java with Sprin Boot, Micronaut or Quarkus. It's based on the Eventuate Tram framework, that works while sending asynchronous mesagges between the differents services. This allow the microservices to quickly update their state and publish this informatin as messages or events to other services.
 
-Para ver más info de Eventuate, [aquí](https://eventuate.io/docs/manual/eventuate-tram/latest/getting-started-eventuate-tram.html) la documentación.
+For more information about Eventuate, click [here](https://eventuate.io/docs/manual/eventuate-tram/latest/getting-started-eventuate-tram.html) for the documentation.
 
-[Ejemplo de Eventuate Tram](https://github.com/MasterCloudApps-Projects/microservices-frameworks/tree/main/Eventuate) : Ejemplo simple de implementación de patrón Sagas en Eventuate Tram.
+[Example with Eventuate Tram](https://github.com/MasterCloudApps-Projects/microservices-frameworks/tree/main/Eventuate) : The example specified before implemented with this framework.
 
  ## Cadence:
 <img src="./assets/img/cadence.png" width="350"/>
 
 <br/>
 
-Cadence consiste en un framework de programación (cliente) y un servicio de gestión (backend). El framework permite al desarrollador crear y coordinar funciones y soporta los lenguajes Go, Java, Python y Ruby (aunque los dos últimos no tienen soporte oficial). El backend es un servicio stateless y depende de un almacenamiento persistente, con Cassandra, MySQL o PostgreSQL. Este servicio backend maneja el historial de los workflows, coordina las actividades de cada participante, redirige las señales al worker correcto, etc..
+Cadence is a framework that has a client and a backend. It allows us to develop, create and coordinate services with Workflows (Sagas). It supports several languages such as: Go, Java, Python and Ruby. The backend is a stateless service that depends of an BBDD (Cassandra, MySQL or PostgresSQL). This manage the state and history of the workflows, coordinate the activities for each microservice and redirect the signal to the correct worker.
 
-Para ver más info de Cadence Workflow, [aquí](https://cadenceworkflow.io/docs/get-started/) la documentación.
+For more information about  Cadence Workflow, [here](https://cadenceworkflow.io/docs/get-started/) for the documentation.
 
-[Ejemplo de Cadence](https://github.com/MasterCloudApps-Projects/microservices-frameworks/tree/main/Cadence) : Ejemplo simple de implementación de patrón Sagas en Cadence Workflow.
+[Example with Cadence](https://github.com/MasterCloudApps-Projects/microservices-frameworks/tree/main/Cadence) : The example specified before implemented with this framework.
 
 

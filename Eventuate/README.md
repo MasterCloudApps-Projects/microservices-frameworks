@@ -1,18 +1,18 @@
 ## Eventuate Tram
-Es compatible y configurable con Java Spring Boot, Micronaut y Quarkus<br>
-Este **framework** funciona mediante el envío de mensajes asíncronos entre los distintos participantes de la saga<br>
-Esta formado por cuatro servicios: Apache Zookeeper, Apache Kafka, una Base de datos MySQL y un componente CDC. Todos estos se despliegan con un docker-compose de forma distribuida.
+This framework supports Java Spring Boot, Micronaut y Quarkus<br>
+It works while sending asynchronous message between differents microservices.
+It's made with four other technologies: Apache Zookeeper, Apache Kafka, a BBDD MySQL and a CDC component. This is all run with a docker-compose file in a distributed way.
 
-Nuestro ejemplo está formado por dos microservicios: `OrderService` que crea pedidos y `CustomerService` que gestiona a los clientes.
+Our example is formed by two microservices: `OrderService` that creates orders and `CustomerService` that manage customers.
 
-Para implementar una Saga con **Eventuate**, lo primero que debemos hacer es crear una clase que implemente la interfaz **SimpleSaga** y dentro de la misma definir un orquestador con **SagaDefinition**. Todo esto lo haremos en nuestro ejemplo en `OrderService`.
+In order to implement the Saga Pattern with **Eventuate**, we need to first create a class that implements the **SimpleSaga** interface and within it define an orquestrator with the **SagaDefinition** annotation. We'll do all this on the example inside of the `OrderService`.
 
 **SimpleSaga**:
 ```
 public class CreateOrderSaga implements SimpleSaga<CreateOrderSagaData> {
 ```
 
-**SagaDefinition**: Builder de sagas u **Orquestador**
+**SagaDefinition**: Builder of Sagas and **Orquestator**
 ```
  private SagaDefinition<CreateOrderSagaData> sagaDefinition =
           step()
@@ -27,11 +27,11 @@ public class CreateOrderSaga implements SimpleSaga<CreateOrderSagaData> {
           .build();
 ```
 
-Este viene siendo el Orquestador, que permite definir los pasos y las compensaciones de la saga. Esta se divide por funciones **step()** que indican cada uno de los pasos.
+This would be our Orquestator, that will allow us to define the steps and the compensations of the Saga. This is divided by **step()** functions and indicates each one of the steps.
 
-Dentro de estos pasos hay dos tipos de funciones:
+Insdie of these steps, there's two types of functions:
 
-**.invokeLocal**: que indica el llamado a una funciona previamente definida que no requiere comuncación con ningún servicio. 
+**.invokeLocal**: which indicates calling of a function previously defined and it won't require any communication between services.
 
 ```
 .invokeLocal(this::create)
@@ -41,7 +41,7 @@ private void create(CreateOrderSagaData data) {
 }
 ```
 
-**.invokeParticipant**: indica el llamado a una función que requiere la comunicación con algún otro servicio. En nuestro ejemplo, es una acción que enviará un comando al `CustomerService`.
+**.invokeParticipant**: indicates the call of a function that do requires the communication between another service. In our example, is an action that sends a command to the `CustomerService`. 
 
 ```
 .invokeParticipant(this::reserveCredit)
@@ -55,9 +55,9 @@ private CommandWithDestination reserveCredit(CreateOrderSagaData data) {
 }
 ```
 
-Este tipo de función consta de un builder send para la creación de comandos que necesitan llegar a otros servicios.
+This type of function need a builder to create the commands needed to reach out to another service.
 
-Luego el servicio receptor escucha este comando definiendo así un **CommandHadler**, de esta manera: 
+Then the receptor listens to this command defined by **CommandHadler**, this way:
 ```
 public CommandHandlers commandHandlerDefinitions() {
     return SagaCommandHandlersBuilder
@@ -67,8 +67,7 @@ public CommandHandlers commandHandlerDefinitions() {
 }
 ```
 
-Esto indica que función debe de ejecutarse en caso de recibir un mensaje con la clase (comando) que se indique. El método `reserveCredit` que vemos a continuación está definido en `CustomerService` y se ejecuta al recibir un `ReserveCreditCommand` del `OrderService`.
-
+This indicates that the function must be executed only when it recieves a message with that command class. The `reserveCredit` method is defined in `CustomerService` and it will be executed after recieving a `ReserveCreditCommand` from the `OrderService`.
 
 ```
   public Message reserveCredit(CommandMessage<ReserveCreditCommand> cm) {
@@ -83,10 +82,9 @@ Esto indica que función debe de ejecutarse en caso de recibir un mensaje con la
     }
   }
 ```
+Followed by this, you can add one or many compensation functions.
 
-Seguido de este este, se puede añadir una o varias funciones de compensación. 
-
-**withCompensation**: en caso de error se ejecutará de manera automatica la función que se indique. En este caso, si falla la reserva de crédito del `CustomerService`, el pedido se rechaza.
+**withCompensation**: in case of an error the function defined with this will be executed automatically . For example, if Reserve Credit fails, the order will be rejected.
 
 ```
 .withCompensation(this::reject)
@@ -94,10 +92,9 @@ private void reject(CreateOrderSagaData data) {
     orderService.rejectOrder(data.getOrderId(), data.getRejectionReason());
 }
 ```
+To manage the responde that could be recieved on each step we can use:
 
-Para gestionar la respuesta que devuelve alguno de los pasos podemos usar:
-
-**onReply**: Espera por una respuesta específica y si la recibe lanza la ejecución de un método. En nuestro ejemplo, el orquestador espera a las posibles excepciones que puede lanzar el `CustomerService` al ejecutar el `reserveCredit` y, si alguna de las dos excepciones llega, lanza un método para actualizar el motivo del rechazo del pedido.
+**onReply**: It waits for an specific answer and if its recieved it launches a specific method. In our example, the orquestator waits to the possible errors that the `CustomerService` could send when executing the `reserveCredit` and, if its recieved it fires a function to update the rejectedReason of the order.
 
 ```
 .invokeParticipant(this::reserveCredit)
@@ -113,43 +110,43 @@ private void handleCustomerCreditLimitExceeded(CreateOrderSagaData data, Custome
 }
 ```
 
-## Compilar y lanzar la aplicación
+## Compile and launch our application
 
-Primero debemos compilar la aplicación, usamos para ello:
+First we need to compile our application using:
 
 ```
 ./gradlew assemble
 ```
 
-Después, desplegamos los distintos servicios, usando para ello [Docker Compose](https://docs.docker.com/compose/):
+Then, we launch the different services using [Docker Compose](https://docs.docker.com/compose/), like this:
 
 ```
 ./gradlew mysqlComposeBuild
 ./gradlew mysqlComposeUp
 ```
 
-Una vez que se ha iniciado nuestra aplicación, podemos las urls de nuestros servicios serán:
+Once it's initialized, the urls will be:
 
     - order-service:  http://localhost:8081
     - customer-service:  http://localhost:8082
     - api-gateway:  http://localhost:8083
 
 
-Cuando hayamos terminado la ejecución, podemos parar y eliminar los contenedores creados por el docker-compose con:
+When we finish using it we can delete and stop all the container doing this:
 
 ```
     $ ./gradlew mysqlComposeDown
 ```
 
-## Ejemplos de uso
+## Use cases
 
-Vamos a utilizar curl para ver cómo funciona esta aplicación.
+We're gonna use curl to the how the application works
 
-Crear un cliente
+Create client
 ```bash
 $ curl -X POST --header "Content-Type: application/json" -d '{
   "creditLimit": 5,
-  "name": "Nombre Apellido"
+  "name": "Name Lastname"
 }' http://localhost:8082/customers
 
 HTTP/1.1 200
@@ -160,7 +157,7 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-Crear un pedido
+Create an order
 ```bash
 $ curl -X POST --header "Content-Type: application/json" -d '{
   "customerId": 1,
@@ -175,7 +172,7 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-Comprobar el estado del pedido que hemos creado
+Check the state of the order
 ```bash
 $ curl -X GET http://localhost:8081/orders/1
 

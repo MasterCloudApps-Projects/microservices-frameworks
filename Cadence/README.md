@@ -1,47 +1,32 @@
 # Cadence
-Es compatible y configurable con Java, Spring Boot y Go.
+It supports Java Spring Boot, Go, Python and Ruby.
 
-Este **framework** tiene un paquete que te permite definir y crear arquitecturas basadas en eventos y sagas.
+This framework has a package that allows us to define and create arquitectures based on events and Sagas.
 
-Acá explicaremos un poco la documentación y como hemos implementado esta en el ejemplo genérico.
+Here we'll explain the basic documentation and how it can be used with Java.
 
-## Documentación
+## Documentation
 
-El nucleo de **Cadence** esta basado en una unidad de estados llamada *workflow*, que es donde podemos implementar las Sagas. Un workflow esta compuesto por una serie de pasos y funciones que nos permite llevar a cabo una orquestación de un proceso entre sericios. 
+The **Cadence** core is based on a unit that's called *workflow*, that is the equivalent to a Saga. A workflow is made by a series of steps and functions that allow us to do an orquestation of a process between several services.
 
-El primer paso es crear la base de un workflow como una *interface* y definiendo los métodos que se van a utilizar.
+The first step is to create the base of a workflow as a interface and defined there the methods that will be implemented.
 
-Esto se hace con la anotación **@WorkflowMethod**: 
+This is made with the **@WorkflowMethod** annotation:
 ```
 @WorkflowMethod
 Long createOrder(Long customerId, Double totalMoney);
 ```
-
-También tenemos **@SignalMethod**, que se utilizan para definir un método que va a reaccionar a una *signal*
-
-```
-@SignalMethod
-void abandon();
-```
-
-Y por último tenemos los **@QueryMethod**, que se utilizan para indicar una funcion que va a reaccionar a una *query*
-
-```
-@QueryMethod(name="status")
-String getStatus();
-```
-
-Luego de definir el **Workflow**, como lo hemos visto, se crea su implementación:
+After defining the **Workflow**, we need to create it's implementation:
 
 ```
 public class CreateOrderWorkflowImpl implements CreateOrderWorkflow {
 ```
 
-Lo siguiente es definir las **Actividades**. Estás son funciones (async o sync) que son invocadas a lo largo de los pasos de un workflow.
+The next step is to define the **Activities**. This are functions (async o sync) that are invoked throught out the steps of the workflow.
 
-Igual que el Workflow, las **Activities** tienen que definirse como una interface (en un módulo común), para luego implementarlas dentro del Workflow. 
+Like the Workflow, the activities need to be defined as an interface and then implementing it later inside a workflow.
 
-Por ejemplo, cremaos la interfaz: 
+For example, we create an interface:
 
 ```
 public interface CustomerActivities {
@@ -49,7 +34,7 @@ public interface CustomerActivities {
 }
 ```
 
-La implementación: 
+And implement it: 
 
 ```
 public class OrderActivitiesImpl implements OrderActivities {
@@ -64,7 +49,7 @@ public class OrderActivitiesImpl implements OrderActivities {
 }
 ```
 
-Luego de tener la implementación se tiene que crear una instancia de esta actividad al inicializar el workflow utilizando un ActivityOptions Builder proporcionado por Cadence.
+After having implemented it, we need to the create an instance of it when initializing the workflow using an ActivityOptions Builder served by Cadence.
 
 ```
 private final ActivityOptions orderActivityOptions = new ActivityOptions.Builder()
@@ -75,21 +60,19 @@ private final OrderActivities orderActivities =
             Workflow.newActivityStub(OrderActivities.class, orderActivityOptions);
 ```
 
-Luego de tener los workflows y activities definidos e implementados, se construye el workflow y dentro de este se crea la respectiva saga. Para crear la saga se utiliza un Builder proporcionado por Cadence, de esta manera: 
+After having the workflows and activities defined and implemented, we build the workflow and inside it we create the respective Saga. In order to do it we use a Builder that Cadence gives us:
 
 ```
 Saga.Options sagaOptions = new Saga.Options.Builder().build();
 Saga saga = new Saga(sagaOptions);
 ```
-
-Luego de esto, se define el workflow ejecutando actividades que se añaden a la cola de la Saga, así como también compensaciones para esta Saga. De esta manera: 
+Then, we add the activities to the workflow used in their respective steps. Like this:
 ```
 Long orderId = orderActivities.createOrder(customerId, amount);
 saga.addCompensation(orderActivities::rejectOrder, orderId, rejectedReason);
 customerActivities.reserveCredit(customerId, amount);
 ```
-
-Se puede hacer mediante un try y catch utilizando el método de saga.compensate(), de esta manera: 
+We can compensate inside of a Saga with the method saga.compensate() inside of a catch:
 
 ```
 } catch (ActivityFailureException e) {
@@ -103,7 +86,7 @@ Se puede hacer mediante un try y catch utilizando el método de saga.compensate(
 }
 ```
 
-Al inicio de la app se define un @Bean donde se inicializa un workflowClient para que se pueda utilizar a lo largo de toda la app. Dicho esto: 
+At the begining of the app we define a @Bean where we can initialize a workflowClient to be available all along our application:
 
 ```
 @Bean
@@ -128,9 +111,7 @@ CommandLineRunner commandLineRunner(WorkflowClient workflowClient) {
 }
 ```
 
-Esto nos permite utilizar el WorkflowClient a lo largo de la app para crear nuevas instancias o stubs de nuestro workflow, utilizando un Builder proporcionado por Cadence.
-
-Con esto podemos crear metodos que inicialicen un workflow específico, por ejemplo:
+With thiis made we can initialized a workflowClient everytime we need to, for example:
 ```
 public void save(Order order) {
     CreateOrderWorkflow workflow = workflowClient.newWorkflowStub(
@@ -144,11 +125,8 @@ public void save(Order order) {
 }
 ```
 
-
-Haciendo esto, corremos el workflow y por ende la saga para realizar el proceso de manera automatica según lo hayamos definido.
-
-## Implementación
-Para desarrollar una Sagas en este framework tenemos que primero crear las interfaces de **Activities** y **Workflows**, y sus respectivas implementaciones.
+## Implementation
+Create the interfaces of the activities and workflows: 
 
 ```
 public interface CustomerActivities {
@@ -165,7 +143,7 @@ public interface OrderActivities {
 }
 public class OrderActivitiesImpl implements OrderActivities {
 ```
-Con esto definimos los métodos que vamos a utilizar a lo largo de nuestra Saga o Workflow. Así seguimos implementando el workflow.
+And then implementing it:
 
 ```
 public interface CreateOrderWorkflow {
@@ -179,7 +157,7 @@ public class CreateOrderWorkflowImpl implements CreateOrderWorkflow {
         Saga.Options sagaOptions = new Saga.Options.Builder().build();
 ```
 
-Luego de tener esto definido, vamos a crear el flujo de comportamiento de la saga dentro del **Workflow** ejecutando **Activities** y añadiendo **Compensations**:
+Then we'll create a new Saga inside of the workflow and build the flow with the activities and compensations:
 
 ```
 @Override
@@ -208,26 +186,26 @@ Luego de tener esto definido, vamos a crear el flujo de comportamiento de la sag
         }
     }
 ```
-## Compilar y lanzar la aplicación
-Estos son los pasos para inicializar el back de Cadence:
+## Compile and launch our application
+These are the steps to launch the cadence backend need it to work:
 
 ### Download docker compose Cadence Server
-Descargamos el fichero de docker-compose con todo lo necesario para inicializar nuestro back de cadence.
+Download the docker-compose file neeed to initialize our backend.
 
 > curl -O https://raw.githubusercontent.com/uber/cadence/master/docker/docker-compose.yml
 > 
 > docker-compose up
 
 ### Run cadence server host
-**OPCIONAL**
+**OPTIONAL**
 
-Esto es un server host (Gráfico) que te permite ver los pasos que se van ejecutando a lo largo de un workflow.
+This a server host (Graphs and Data) that allows to see how the steps and workflows are being executed through out our application:
 > docker run --network=host --rm ubercadence/cli:master --do example domain register -rd 1
 
-## Ejemplos de uso
-Para poder probar la aplicación tenemos las siguiente peticiones: 
+## Use cases
+To try this application we have this calls and URLs:
 
-**Crear un customer POST (http://localhost:8081/customers)**:
+**Create a customer POST (http://localhost:8081/customers)**:
 
 body:
 ```
@@ -236,7 +214,7 @@ body:
     "money": 18000
 }
 ```
-**Crear una orden POST (http://localhost:8080/orders)**:
+**Create an order POST (http://localhost:8080/orders)**:
 
 body:
 ```
@@ -245,7 +223,7 @@ body:
     "customerId": "1"
 }
 ```
-**Obtener una orden GET (http://localhost:8080/orders)**:
+**Get an order GET (http://localhost:8080/orders)**:
 
 body:
 ```
@@ -261,7 +239,7 @@ body:
 ]
 ```
 
-**Obtener un customer GET (http://localhost:8081/get_customer?id=customerid)**:
+**Get a customer GET (http://localhost:8081/get_customer?id=customerid)**:
 
 body:
 ```
