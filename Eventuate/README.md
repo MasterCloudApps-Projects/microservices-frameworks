@@ -1,6 +1,6 @@
 ## Eventuate Tram
 This framework supports Java Spring Boot, Micronaut y Quarkus<br>
-It works while sending asynchronous message between differents microservices.
+It works while sending asynchronous message between different microservices.
 It's made with four other technologies: Apache Zookeeper, Apache Kafka, a BBDD MySQL and a CDC component. This is all run with a docker-compose file in a distributed way.
 
 Our example is formed by two microservices: `OrderService` that creates orders and `CustomerService` that manage customers.
@@ -12,7 +12,7 @@ In order to implement the Saga Pattern with **Eventuate**, we need to first crea
 public class CreateOrderSaga implements SimpleSaga<CreateOrderSagaData> {
 ```
 
-**SagaDefinition**: Builder of Sagas and **Orquestator**
+**SagaDefinition**: Builder of Sagas and **Orquestrator**
 ```
  private SagaDefinition<CreateOrderSagaData> sagaDefinition =
           step()
@@ -27,9 +27,9 @@ public class CreateOrderSaga implements SimpleSaga<CreateOrderSagaData> {
           .build();
 ```
 
-This would be our Orquestator, that will allow us to define the steps and the compensations of the Saga. This is divided by **step()** functions and indicates each one of the steps.
+This would be our Orquestrator, that will allow us to define the steps and the compensations of the Saga. This is divided by **step()** functions and indicates each one of the steps.
 
-Insdie of these steps, there's two types of functions:
+Inside of these steps, there's two types of functions:
 
 **.invokeLocal**: which indicates calling of a function previously defined and it won't require any communication between services.
 
@@ -57,7 +57,7 @@ private CommandWithDestination reserveCredit(CreateOrderSagaData data) {
 
 This type of function need a builder to create the commands needed to reach out to another service.
 
-Then the receptor listens to this command defined by **CommandHadler**, this way:
+Then the receptor listen to this command defined by **CommandHadler**, this way:
 ```
 public CommandHandlers commandHandlerDefinitions() {
     return SagaCommandHandlersBuilder
@@ -84,7 +84,7 @@ This indicates that the function must be executed only when it recieves a messag
 ```
 Followed by this, you can add one or many compensation functions.
 
-**withCompensation**: in case of an error the function defined with this will be executed automatically . For example, if Reserve Credit fails, the order will be rejected.
+**withCompensation**: in case of an error the function defined with this will be executed automatically. For example, if Reserve Credit fails, the order will be rejected.
 
 ```
 .withCompensation(this::reject)
@@ -94,7 +94,7 @@ private void reject(CreateOrderSagaData data) {
 ```
 To manage the responde that could be recieved on each step we can use:
 
-**onReply**: It waits for an specific answer and if its recieved it launches a specific method. In our example, the orquestator waits to the possible errors that the `CustomerService` could send when executing the `reserveCredit` and, if its recieved it fires a function to update the rejectedReason of the order.
+**onReply**: It waits for an specific answer and if its recieved it launches a specific method. In our example, the orquestrator waits to the possible errors that the `CustomerService` could send when executing the `reserveCredit` and, if its recieved it fires a function to update the rejectedReason of the order.
 
 ```
 .invokeParticipant(this::reserveCredit)

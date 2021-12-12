@@ -6,27 +6,27 @@ Here we're gonna explain the basics of the Axon documentation and how to impleme
 
 ## Documentation
 The main functions and command are:
-**@Aggregate**: This is an object that has a state and methods to change it's own state. By defualt, Axon configures the aggregators with Event Sourcing.
+**@Aggregate**: This is an object that has a state and methods to change it's own state. By default, Axon configures the aggregators with Event Sourcing.
 
 ```
 @Aggregate
 public class CustomerAggregate () {
 ```
 
-**@AggregateIdentifier**: to declare the id of an aggregator.
+**@AggregateIdentifier**: declares the id of an aggregator.
 
 ```
 @AggregateIdentifier
 private String customerId;
 ```
 
-**@CommandHandler**: Identifies a function as command hanlder. This allow us to manage certain commands to send events.
+**@CommandHandler**: identifies a function as command hanlder. This allow us to manage certain commands to send events.
 ```
 @CommandHandler
 public void handle(ValidateCustomerPaymentCommand validateCustomerPaymentCommand) {
 ```
 
-**Note**: The first command defined inside of an Aggregator, that it should be the one needed to create itself, it should be written this way:
+**Note**: the first command defined inside of an Aggregator, that it should be the one needed to create itself, it should be written this way:
 
 ```@CommandHandler
 public CustomerAggregate(CreateCustomerCommand createCustommerCommand) {
@@ -62,13 +62,13 @@ public Order handle(FindOrderByIdQuery findOrderByIdQuery) {
 
 Axon aslo gives us gateways that we can use to emit events, queries and commands. 
 
-**CommandGateway**: It's used to send commands. We have .send (async) and .sendAndWait (sync)
+**CommandGateway**: it's used to send commands. We have .send (async) and .sendAndWait (sync)
 
 ```
 commandGateway.send(COMMAND);
 ```
 
-**AggregateLifecycle**: This allow us change the state of the aggregate and the emite an event.
+**AggregateLifecycle**: this allow us change the state of the aggregate and the emit an event.
 
 ```
 AggregateLifecycle.apply(new OrderCreatedEvent())

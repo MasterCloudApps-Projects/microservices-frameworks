@@ -7,7 +7,7 @@ Here we'll explain the basic documentation and how it can be used with Java.
 
 ## Documentation
 
-The **Cadence** core is based on a unit that's called *workflow*, that is the equivalent to a Saga. A workflow is made by a series of steps and functions that allow us to do an orquestation of a process between several services.
+The **Cadence** core is based on a unit that's called *workflow*, that is the equivalent to a Saga. A workflow is made by a series of steps and functions that allow us to do an orquestration of a process between several services.
 
 The first step is to create the base of a workflow as a interface and defined there the methods that will be implemented.
 
@@ -190,7 +190,7 @@ Then we'll create a new Saga inside of the workflow and build the flow with the 
 These are the steps to launch the cadence backend need it to work:
 
 ### Download docker compose Cadence Server
-Download the docker-compose file neeed to initialize our backend.
+Download the docker-compose file neeed to initialize our backend and run it.
 
 > curl -O https://raw.githubusercontent.com/uber/cadence/master/docker/docker-compose.yml
 > 

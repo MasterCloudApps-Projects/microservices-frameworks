@@ -6,7 +6,7 @@ This repository is about the result of an investigation about the Saga Pattern a
 
 We have compared: how it's implemented, learning curve, velocity, efficiency, size of the community, documentation, among other things. 
 
-Our objectives with this investigatin are:
+Our objectives with this investigation are:
 - **Research** the options for frameworks available on the market right now.
 - **Generate documentation**, since it lacks of information.
 - **Compare** each and every technology to remark the pros and cons of each one of them. And help to find the best suited option for each of the use cases. 
@@ -26,9 +26,9 @@ The excercise consist in creating a Saga on the **Order Service** to manage the 
 ### Steps:
 
 - **Create Customer**: We need to create a customer in order to associate it with the order we want to create. The customer need to be created with an amount of balance. 
-- **Crear Orden**: Then we create the order with a specific customer.
-- **Verificar Balance**: Withing the **Order Service** we verify is the customer that associeted with the order has enough balance to approved or else it will be rejected by insufficient fund.
-- **Actualizar Estado Final de la Orden**: After the response of the **Customer Service** the state of the order will change to REJECTED or APPROVED.
+- **Create an Order**: Then we create the order with a specific customer.
+- **Verify Balance**: Withing the **Order Service** we verify is the customer that associeted with the order has enough balance to approved or else it will be rejected by insufficient fund.
+- **Update the final state of the Order**: After the response of the **Customer Service** the state of the order will change to REJECTED or APPROVED.
 
 ## 👨‍💻 Frameworks
 
@@ -38,7 +38,7 @@ The **frameworks** we chose are:
 <img src="./assets/img/axon.png" width="600"/>
 
 <br/>
-Is a framework developed for the construction of microservices controlled by events, it's based on CQRS and Event Sourcing arquitecture. And it can implement the Saga Pattarn between them.
+Is a framework developed for the construction of microservices controlled by events. It's based on CQRS and Event Sourcing arquitecture. And it can implement the Saga Pattern.
 
 For more information about Axon Framework, click [here](https://docs.axoniq.io/reference-guide/) for the documentation.
 
@@ -50,7 +50,7 @@ For more information about Axon Framework, click [here](https://docs.axoniq.io/r
 
 <br/>
 
-Eventuate Tram Sagas is a framework used to implemen the Saga Pattern between microservices. It uses Java with Sprin Boot, Micronaut or Quarkus. It's based on the Eventuate Tram framework, that works while sending asynchronous mesagges between the differents services. This allow the microservices to quickly update their state and publish this informatin as messages or events to other services.
+Eventuate Tram Sagas is a framework used to implement the Saga Pattern between microservices. It uses Java with Spring Boot, Micronaut or Quarkus. It's based on the Eventuate Tram framework, that works while sending asynchronous mesagges between the different services. This allow the microservices to quickly update their state and publish this information as messages or events to other services.
 
 For more information about Eventuate, click [here](https://eventuate.io/docs/manual/eventuate-tram/latest/getting-started-eventuate-tram.html) for the documentation.
 
@@ -61,7 +61,7 @@ For more information about Eventuate, click [here](https://eventuate.io/docs/man
 
 <br/>
 
-Cadence is a framework that has a client and a backend. It allows us to develop, create and coordinate services with Workflows (Sagas). It supports several languages such as: Go, Java, Python and Ruby. The backend is a stateless service that depends of an BBDD (Cassandra, MySQL or PostgresSQL). This manage the state and history of the workflows, coordinate the activities for each microservice and redirect the signal to the correct worker.
+Cadence is a framework that has a client and a backend. It allows us to develop, create and coordinate services with Workflows (Sagas). It supports several languages such as: Go, Java, Python and Ruby. The backend is a stateless service that depends of a BBDD (Cassandra, MySQL or PostgresSQL). This manage the state and history of the workflows, coordinate the activities for each microservice and redirect the signal to the correct worker.
 
 For more information about  Cadence Workflow, [here](https://cadenceworkflow.io/docs/get-started/) for the documentation.
 
