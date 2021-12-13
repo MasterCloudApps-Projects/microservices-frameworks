@@ -43,10 +43,6 @@ public class OrderService {
                         .build()
         );
 		WorkflowClient.execute(workflow::createOrder, order.getCustomerId(), order.getMoney());
-		//repository.findById(id);
-		System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-		System.out.println(order.getId());
-		System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
 	}
 
 	public void delete(Long id) {

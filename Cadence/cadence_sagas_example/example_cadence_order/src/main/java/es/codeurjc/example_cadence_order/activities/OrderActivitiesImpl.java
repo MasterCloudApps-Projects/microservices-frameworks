@@ -19,15 +19,8 @@ public class OrderActivitiesImpl implements OrderActivities{
 
     @Override
     public Long createOrder (Long customerId, Double amount) {
-        System.out.println("Llega al create order");
         Order order = new Order(customerId, amount);
-        //Order orderSaved = repository.saveAndFlush(order);
-        System.out.println("Antes del repository");
         service.saveOrder(order);
-        System.out.println("Order created in pending state");
-        //logger.info("" + orderSaved.getId());
-        System.out.println("Guardando orden con id: " + order.getId());
-        //System.out.println("Devolviendo orden con id: " + orderSaved.getId());
         return order.getId();
     }
 
